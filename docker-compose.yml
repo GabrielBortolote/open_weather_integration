@@ -1,0 +1,45 @@
+version: '2.28.1'
+
+services:
+
+  db:
+    image: mysql
+    container_name: mysql
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  celery:
+    build: .
+    container_name: celery
+    command: celery -A open_weather_integration worker -l info
+    env_file: ".env"
+    depends_on:
+      - redis
+
+  app:
+    build: .
+    container_name: app
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    env_file: ".env"
+    depends_on:
+      - db
+      - redis
+      - celery
+    links:
+      - db
+
+volumes:
+  db_data:
