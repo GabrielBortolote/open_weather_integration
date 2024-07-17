@@ -1,5 +1,6 @@
 from django.db import models
-from api.utils import total_number_of_cities
+
+from api.cities import Cities
 
 class User(models.Model):
 
@@ -14,7 +15,8 @@ class User(models.Model):
     cities completed) until the current moment"""
     
     already_requested = self.number_of_cities_requested()
-    total_to_request = total_number_of_cities()
+    cities = Cities()
+    total_to_request = cities.total_number_of_cities()
     return (already_requested * 100)/total_to_request
     
 
