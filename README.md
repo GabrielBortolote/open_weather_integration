@@ -21,8 +21,8 @@ Follow these steps to run the project, you just need docker, and the plugin dock
 
 1. Clone the project in you local machine;
 2. Open a terminal in the root folder of the project;
-3. Create a file .env;
-4. Copy the content of the file .dev.env to the .env file;
+3. Create a file **.env**;
+4. Copy the content of the file **.dev.env** to the **.env** file;
 5. Replace OPEN_WEATHER_API_KEY variable for your Open Weather API Key Account;
 6. Run the command: docker compose up --build;
 7. Ready, you can access the services of the project.
@@ -31,9 +31,9 @@ Follow these steps to run the project, you just need docker, and the plugin dock
 
 To build this application I chose these technologies:
 
-- Django: a robust Python web framework, it provides tools for testing, routing, db communication and much more;
-- Celery: a service to run asynchronous tasks, acting besides Django, I chose to use just one queue, one worker and keep only one concurrency processor, the tasks are going to be executed one by one;
-- MySQL: for storage, this database service is commonly used in simple and small applications, it can be easily integrated with django.
+- **Django**: a robust Python web framework, it provides tools for testing, routing, db communication and much more;
+- **Celery**: a service to run asynchronous tasks, acting besides Django, I chose to use just one queue, one worker and keep only one concurrency processor, the tasks are going to be executed one by one;
+- **MySQL**: for storage, this database service is commonly used in simple and small applications, it can be easily integrated with django.
 
 ## Using the application
 
