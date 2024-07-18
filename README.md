@@ -6,9 +6,9 @@ a JSON data.
 ## Specifications
 
 - All the logic is built using Python 3;
-- Async calls to 'Call for several city IDs' API to get weather information from the cities indexed by the file 'cities.'cities.csv'';
-- Respect Open Weather free account limit, exactly 60 requests per minute (or 1 per sec);
-- An account at Open Weather API it's necessary, each account has a code that must be send to  the API;
+- The application must do async calls to Open Weather API to get weather information from the cities indexed by the file 'cities.csv';
+- The application must respect Open Weather free account limit, exactly 60 requests per minute (or 1 per sec);
+- An account at Open Weather API it's necessary, each account has a code that must be send to the API;
 - Code needs to have more than 90% of test coverage;
 - Open git repository (preferable in github);
 - Docker must be used to set up the environment, so a Dockerfile must exists in the project.

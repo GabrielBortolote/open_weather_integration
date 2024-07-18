@@ -7,6 +7,7 @@ from api.user_controller import register_user
 
 
 class UniqueView(View):
+    
     def get(self, request, *args, **kwargs):
       user_id = request.GET.get('user_id', '')
       user = get_object_or_404(User, pk=user_id)
