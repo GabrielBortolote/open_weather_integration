@@ -5,6 +5,8 @@ a JSON data.
 
 ## Specifications
 
+These are the specifications to this challenge:
+
 - All the logic is built using Python 3;
 - The application must do async calls to Open Weather API to get weather information from the cities indexed by the file 'cities.csv';
 - The application must respect Open Weather free account limit, exactly 60 requests per minute (or 1 per sec);
@@ -13,108 +15,80 @@ a JSON data.
 - Open git repository (preferable in github);
 - Docker must be used to set up the environment, so a Dockerfile must exists in the project.
 
-## Endpoints
+## Set-up
 
-### POST
+Follow these steps to run the project, you just need docker, and the plugin docker compose installed in your machine.
 
-Receives a user defined ID, collect weather data from Open Weather API and store:
+1. Clone the project in you local machine;
+2. Open a terminal in the root folder of the project;
+3. Create a file .env;
+4. Copy the content of the file .dev.env to the .env file;
+5. Replace OPEN_WEATHER_API_KEY variable for your Open Weather API Key Account;
+6. Run the command: docker compose up --build;
+7. Ready, you can access the services of the project.
 
-- The user defined ID (needs to be unique for each request)
-- Datetime of request
-- JSON data with:
-- City ID
-- Temperature in Celsius
-- Humidity
+## Infrastructure
 
-### GET
+To build this application I chose these technologies:
 
-Receives the user defined ID, returns with the percentage of the POST progress ID (collected cities completed) until the current moment.
+- Django: a robust Python web framework, it provides tools for testing, routing, db communication and much more;
+- Celery: a service to run asynchronous tasks, acting besides Django, I chose to use just one queue, one worker and keep only one concurrency processor, the tasks are going to be executed one by one;
+- MySQL: for storage, this database service is commonly used in simple and small applications, it can be easily integrated with django.
 
-## Usage
+## Using the application
 
-The system works this way:
+After following the set-up guide, with the docker containers running, the main service is going to be accessible on port 8000 and it's possible to send requests to it. First you need to send the POST request, with the user_id inside the parameters, this id must be unique:
 
-1. The user enter in the system and receives a unique ID;
-2. The user request data, this could be a button or any other way to trigger an action;
-3. The system records the user ID and the request datetime;
-4. Then the system starts to request the following data for each city in 'cities.csv': city id, temperature and humidity;
-5. The Open Weather API free account only accepts one request by second, so get data from 60 cities the time is going to be 1 minute, during this time the API must retrieve the user can be updated about the progress of the requests, something like a loading bar;
-6. After finishing the requests to Open Weather it is possible to show the data to the user.
+```bash
+curl -X POST -d "user_id=123456789" localhost:8000
+User 123456789 created, requests inserted on queue.
+```
 
-## My idea
+Once the post is sent the user is registered in the system and all the cities in the list 'cities.csv' are going to be requested for that user. Each request means a celery task, it's possible to monitor the requests using the celery flower interface, you just need to open localhost:5555 on your favorite browser. In this monitoring tool you can see that each task takes at least one second to execute, this condition was implemented inside the task, to grant that the application will never exceed Open Weather Free account limit, like this image shows:
 
-My idea is to develop a frontend de-attached from the backend. The backend is going to implement the API and the communication with Open Weather. The frontend is going to send the requests and show the data to the user in a friendly way.
+![flower preview](README_images/flower-preview.png "Celery flower preview")
 
-### Backend
+Then you can perform a GET request to check the percentage of how many requests are still complete for that user:
 
-All the backend implementation were done using Django Rest Framework. This is a complete framework that provides features to create endpoints, communicate with persistency in a simple way and testing the entire application.
+```bash
+curl localhost:8000?user_id=123456789
+14.37125748502994
+```
 
-The persistency are going to be done using MySQL, because it's a simple to use and robust enough to handle this use case. See more benefits in this [link](https://www.oracle.com/mysql/what-is-mysql/#mysql-benefits).
+In this case 14.37% of the requests to the user 123456789 were completed in the moment that the GET request was done. When all the requests to the user is completed this request will return 100.00.
 
-The following components are going to be part of the solution:
+Each request executed by celery stores the data about the cities listed in the 'cities.csv' file. It's easy to consult and check this data on the mysql container:
 
-#### OpenWeatherAdapter
+```bash
+docker exec -it mysql mysql -u root -p"rootpassword" -D default_database -e "SELECT * FROM api_usercityrequest WHERE user_id = '123456789' LIMIT 10;"
+```
 
-A class to communicate with Open Weather API, separating the project API logic from Open Weather API logic, the class should implement the following methods:
+This is the prompted result:
 
-##### get_city(city_id)
+```bash
+mysql: [Warning] Using a password on the command line interface can be insecure.
++-----+----------------------------+---------+----------------------------+-------------+----------+-----------+
+| id  | created_at                 | city_id | city_name                  | temperature | humidity | user_id   |
++-----+----------------------------+---------+----------------------------+-------------+----------+-----------+
+| 502 | 2024-07-18 22:43:46.633077 | 3439525 | Young                      |         286 |       90 | 123456789 |
+| 503 | 2024-07-18 22:43:47.627751 | 3439781 | Treinta y Tres             |         284 |       89 | 123456789 |
+| 504 | 2024-07-18 22:43:48.650467 | 3440645 | Departamento de San Jos�  |         287 |       89 | 123456789 |
+| 505 | 2024-07-18 22:43:49.675145 | 3442098 | La Paz                     |         287 |       77 | 123456789 |
+| 506 | 2024-07-18 22:43:50.561049 | 3442778 | Delta del Tigre            |         287 |       77 | 123456789 |
+| 507 | 2024-07-18 22:43:51.589439 | 3443341 | Carmelo                    |         286 |       84 | 123456789 |
+| 508 | 2024-07-18 22:43:52.504953 | 3442233 | Jose Batlle y Ordonez      |         283 |       90 | 123456789 |
+| 509 | 2024-07-18 22:43:53.599981 | 3440781 | Rivera                     |         286 |       94 | 123456789 |
+| 510 | 2024-07-18 22:43:54.693496 | 3441572 | Departamento de Montevideo |         287 |       77 | 123456789 |
+| 511 | 2024-07-18 22:43:55.519993 | 3441575 | Montevideo                 |         287 |       77 | 123456789 |
++-----+----------------------------+---------+----------------------------+-------------+----------+-----------+
+```
 
-A method to request data from a specific city.
+We have city_name, temperature and humidity. All these data are coming from Open Weather API.
 
-#### RequestQueue
+## Executing Tests
 
-This class control how many requests are being done to Open Weather API, respecting the limit of time of each request. The requests can be inserted in a queue and then executed async in batches of 60 requests, using the class OpenWeatherAdapter to perform them, respecting the limit of 60 seconds between each batch. Only one instance of the object must be created, to grant full control of the requests being done. This class implements the following methods:
+All the tests were implemented using django default test engine, so you can easily execute then inside the **app** container. This way:
 
-##### add_cities(list)
-
-Add in the queue all the cities that have to be requested to Open Weather
-
-##### request()
-
-Once the queue is filled with the cities, this method can be called to execute the request loop. For each city in the queue the data is going to be requested, in batches of 60, async, between each batch the limit time is going to be waited. The requests are going do be done using the OpenWeatherAdapter, and the returned data is going to be stored in a result attribute of the class. Once a request to a city ID is done this ID can be removed from the queue, once the queue is empty the request loop finishes and the function can return. This function needs to be called async.
-
-#### len()
-
-Return the total number of city ID's in the list.
-
-##### status()
-
-Returns the total number of already requested city ID's.
-
-#### clear()
-
-Remove all t
-
-
-#### UserQueue
-
-Several users can access the system at the same time, but unfortunately Open Weather Free account have a limit of requests per minute (60 requests per minute) so the system have to put the users in a queue named UserQueue. This class is responsible to put the users in the Queue, trigger the method that perform the requests to the first user in the queue and once all requests is done, remove the user from the queue. This class have to implement the following methods:
-
-##### add_user(user)
-
-Add an user in the end of the queue and returns the position of the user in the list, 1-indexed (same than the length of the queue).
-
-##### execute_first()
-
-Add all the cities provided in the 'cites.csv' in the RequestQueue
-
-##### get_user_status(user)
-
-Receive an user
-
-### Frontend
-
-An web interface built using React, because react can easily update data in the screen using virtual DOM and this is exactly the behavior we are searching for. This is user journey on the frontend:
-
-1. Once the user access the page the frontend loads and show him/her a button;
-2. Once the user click in this button the frontend is going to generate an UID and send the POST request to the backend, if the UID already exists the backend is going to reply 400 BAD REQUEST, this way the frontend can generate another UID;
-3. Once the UID was generated were generated and a 200 SUCCESS was replied by the backend the frontend knows that the the UID is now registered and the requests to Open Weather are going to be queued;
-4. The frontend shows a loading bar and starts sending GET requests to the backend to update the loading bar status;
-5. Once all the requests are finished the frontend can show the data from each city requested to Open Weather.
-6. Observation: if the page was re-loaded on closed the UID will be lost by the frontend, the button is going to be displayed to start the requests again.
-
-
-Why celery?
-
-Why Redis?
-https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/index.html#redis
+```bash
+docker exec app python manage.py test
+```
