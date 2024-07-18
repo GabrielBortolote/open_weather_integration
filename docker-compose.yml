@@ -30,7 +30,7 @@ services:
       - /bin/bash
       - -c
       - |
-        celery -A open_weather_integration worker -l info &
+        celery -A open_weather_integration worker --concurrency 1 -l info &
         celery -A open_weather_integration flower --port=5555 &
         python manage.py migrate &&
         python manage.py runserver 0.0.0.0:8000
