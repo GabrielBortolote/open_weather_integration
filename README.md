@@ -1,11 +1,10 @@
 # Open Weather Integration
 
-This project design and build a service that collects data from an Open Weather API and store it as
-a JSON data.
+This project design and build a service that collects data from an Open Weather API assync and then store it.
 
 ## Specifications
 
-These are the specifications to this challenge:
+These are the specifications for this project:
 
 - All the logic is built using Python 3;
 - The application must do async calls to Open Weather API to get weather information from the cities indexed by the file 'cities.csv';
@@ -13,9 +12,9 @@ These are the specifications to this challenge:
 - An account at Open Weather API it's necessary, each account has a code that must be send to the API;
 - Code needs to have more than 90% of test coverage;
 - Open git repository (preferable in github);
-- Docker must be used to set up the environment, so a Dockerfile must exists in the project.
+- Docker must be used to set up the environment, therefore a Dockerfile must exist in the project.
 
-## Set-up
+## Set up
 
 Follow these steps to run the project, you just need docker, and the plugin docker compose installed in your machine.
 
@@ -33,11 +32,11 @@ To build this application I chose these technologies:
 
 - **Django**: a robust Python web framework, it provides tools for testing, routing, db communication and much more;
 - **Celery**: a service to run asynchronous tasks, acting besides Django, I chose to use just one queue, one worker and keep only one concurrency processor, the tasks are going to be executed one by one;
-- **MySQL**: for storage, this database service is commonly used in simple and small applications, it can be easily integrated with django.
+- **MySQL**: is used for storage, as it is commonly employed in simple and small applications.
 
 ## Using the application
 
-After following the set-up guide, with the docker containers running, the main service is going to be accessible on port 8000 and it's possible to send requests to it. First you need to send the POST request, with the user_id inside the parameters, this id must be unique:
+After setting up the environment, with the Docker containers running, the main service is accessible on port 8000 and it's possible to send requests to it. First you need to send the POST request, with the user_id inside the parameters, this id must be unique:
 
 ```bash
 curl -X POST -d "user_id=123456789" localhost:8000
@@ -87,8 +86,39 @@ We have city_name, temperature and humidity. All these data are coming from Open
 
 ## Executing Tests
 
-All the tests were implemented using django default test engine, so you can easily execute then inside the **app** container. This way:
+All the tests were implemented inside **api/tests** using django default test engine. You can easily execute then inside the app container using these commands::
 
 ```bash
-docker exec app coverage run manage.py test
+docker exec app coverage run --source api manage.py test api
+docker exec app coverage report -m
 ```
+
+The first command executes the tests using the **coverage** package. The second command prompt the coverage package report. The expected output is as follows:
+
+```bash
+Name                                     Stmts   Miss  Cover   Missing
+----------------------------------------------------------------------
+api/__init__.py                              0      0   100%
+api/admin.py                                 1      0   100%
+api/apps.py                                  4      0   100%
+api/cities.py                               19      0   100%
+api/migrations/0001_initial.py               6      0   100%
+api/migrations/__init__.py                   0      0   100%
+api/models.py                               19      0   100%
+api/open_weather_adapter.py                 13      0   100%
+api/tasks.py                                16      0   100%
+api/tests/__init__.py                        0      0   100%
+api/tests/test_cities.py                    25      0   100%
+api/tests/test_models.py                    28      0   100%
+api/tests/test_open_weather_adapter.py      13      0   100%
+api/tests/test_tasks.py                     21      0   100%
+api/tests/test_user_controller.py           16      0   100%
+api/tests/test_views.py                     40      0   100%
+api/urls.py                                  3      0   100%
+api/user_controller.py                       9      0   100%
+api/views.py                                17      0   100%
+----------------------------------------------------------------------
+TOTAL                                      250      0   100%
+```
+
+Meaning that 100% percent of the project is covered by tests.
