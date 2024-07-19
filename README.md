@@ -43,7 +43,7 @@ curl -X POST -d "user_id=123456789" localhost:8000
 User 123456789 created, requests inserted on queue.
 ```
 
-Once the post is sent the user is registered in the system and all the cities in the list 'cities.csv' are going to be requested for that user. Each request means a celery task, it's possible to monitor the requests using the celery flower interface, you just need to open [localhost:5555](http://localhost:5555) on your favorite browser. In this monitoring tool you can see that each task takes at least one second to execute, this condition was implemented inside the task, to grant that the application will never exceed Open Weather Free account limit. You can see a proof of this in this image:
+Once the post is sent the user is registered in the system and all the cities in the list 'cities.csv' are going to be requested for that user. Each request means a celery task, it's possible to monitor the requests using the celery flower interface, you just need to open [localhost:5555](http://localhost:5555/tasks) on your favorite browser. In this monitoring tool you can see that each task takes at least one second to execute, this condition was implemented inside the task, to grant that the application will never exceed Open Weather Free account limit. You can see a proof of this in this image:
 
 ![flower preview](README_images/flower-preview.png "Celery flower preview")
 
