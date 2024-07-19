@@ -54,7 +54,7 @@ curl localhost:8000?user_id=123456789
 14.37125748502994
 ```
 
-In this case 14.37% of the requests to the user 123456789 were completed in the moment that the GET request was done. When all the requests to the user is completed this request will return 100.00.
+In this case **14.37%** of the requests to the user **123456789** were completed in the moment that the GET request was done. When all the requests to the user is completed this request will return **100.00**.
 
 Each request executed by celery stores the data about the cities listed in the 'cities.csv' file. It's easy to consult and check this data on the mysql container:
 
@@ -82,11 +82,11 @@ mysql: [Warning] Using a password on the command line interface can be insecure.
 +-----+----------------------------+---------+----------------------------+-------------+----------+-----------+
 ```
 
-We have city_name, temperature and humidity. All these data are coming from Open Weather API.
+We have **city_name**, **temperature** and **humidity**. All these data are coming from Open Weather API and stored on the local DB storage.
 
 ## Executing Tests
 
-All the tests were implemented inside **api/tests** using django default test engine. You can easily execute then inside the app container using these commands::
+All the tests were implemented inside **api/tests** using django default test engine. You can easily execute then inside the app container using these commands:
 
 ```bash
 docker exec app coverage run --source api manage.py test api
