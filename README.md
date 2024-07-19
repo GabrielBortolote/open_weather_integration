@@ -90,5 +90,5 @@ We have city_name, temperature and humidity. All these data are coming from Open
 All the tests were implemented using django default test engine, so you can easily execute then inside the **app** container. This way:
 
 ```bash
-docker exec app python manage.py test
+docker exec app coverage run manage.py test
 ```
