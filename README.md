@@ -23,7 +23,7 @@ Follow these steps to run the project, you just need docker, and the plugin dock
 3. Create a file **.env**;
 4. Copy the content of the file **.dev.env** to the **.env** file;
 5. Replace OPEN_WEATHER_API_KEY variable for your Open Weather API Key Account;
-6. Run the command: docker compose up --build;
+6. Run the command: ```docker compose up --build -d```;
 7. Ready, you can access the services of the project.
 
 ## Infrastructure
@@ -36,14 +36,14 @@ To build this application I chose these technologies:
 
 ## Using the application
 
-After setting up the environment, with the Docker containers running, the main service is accessible on port 8000 and it's possible to send requests to it. First you need to send the POST request, with the user_id inside the parameters, this id must be unique:
+After setting up the environment, with the Docker containers running, the main service is accessible on port 8000 and it's possible to send requests to it. First you need to send the POST request, with the user_id inside the parameters, this id must be unique, you can use any string as ID, limited to 100 characters, if the ID already exists the API will reply an error message and a 409 status code. If you have **curl** installed on your machine you can use this command to test the application:
 
 ```bash
 curl -X POST -d "user_id=123456789" localhost:8000
 User 123456789 created, requests inserted on queue.
 ```
 
-Once the post is sent the user is registered in the system and all the cities in the list 'cities.csv' are going to be requested for that user. Each request means a celery task, it's possible to monitor the requests using the celery flower interface, you just need to open localhost:5555 on your favorite browser. In this monitoring tool you can see that each task takes at least one second to execute, this condition was implemented inside the task, to grant that the application will never exceed Open Weather Free account limit, like this image shows:
+Once the post is sent the user is registered in the system and all the cities in the list 'cities.csv' are going to be requested for that user. Each request means a celery task, it's possible to monitor the requests using the celery flower interface, you just need to open [localhost:5555](http://localhost:5555) on your favorite browser. In this monitoring tool you can see that each task takes at least one second to execute, this condition was implemented inside the task, to grant that the application will never exceed Open Weather Free account limit. You can see a proof of this in this image:
 
 ![flower preview](README_images/flower-preview.png "Celery flower preview")
 
